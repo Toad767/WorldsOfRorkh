@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Миры Роркха: Вход в Зону</title>
+    <style>
+        /* Центрируем игру на экране */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #111; /* Темный фон для атмосферы */
+        }
+    </style>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+    
+    <div id="auth-ui" style="position: absolute; z-index: 10; padding: 20px; background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; border-radius: 5px;">
+        <h2>Миры Роркха: Вход</h2>
+        <input type="email" id="email" placeholder="Email Сталкера" style="display: block; margin-bottom: 10px; width: 200px; padding: 5px;"/>
+        <input type="password" id="password" placeholder="Пароль от Зоны" style="display: block; margin-bottom: 10px; width: 200px; padding: 5px;"/>
+        <button id="register-btn" style="background-color: #4CAF50; color: white; border: none; padding: 8px 16px; cursor: pointer;">Регистрация</button>
+        <button id="login-btn" style="background-color: #2196F3; color: white; border: none; padding: 8px 16px; cursor: pointer;">Войти</button>
+        <p id="auth-message" style="color: yellow; margin-top: 10px; font-size: 14px;"></p>
+    </div>
+
+    <script src="./js/auth.js"></script> 
+    <script src="./js/game.js"></script> 
+</body>
+</html>
