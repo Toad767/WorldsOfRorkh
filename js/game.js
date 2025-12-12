@@ -1,12 +1,12 @@
 // /js/game.js (ФИНАЛЬНАЯ ВЕРСИЯ: СЕТКА 60x60, МОБИЛЬНЫЙ ДЖОЙСТИК, FIREBASE)
 
-let player;     // Персонаж
-let db;         // Объект для работы с Firestore
-let currentUserId; // ID пользователя
-let joystick;   // Объект джойстика
-let cursors;    // Управление для ПК
+let player;     
+let db;         
+let currentUserId; 
+let joystick;   
+let cursors;    
 const TILE_SIZE = 60; // Размер одного сектора (тайла)
-let isMoving = false; // Флаг, чтобы предотвратить множественные шаги одновременно
+let isMoving = false; // Флаг для контроля движения по сетке
 
 // Главная функция, которая запускает игру после аутентификации
 function startGame() {
@@ -16,6 +16,7 @@ function startGame() {
     
     const config = {
         type: Phaser.AUTO, 
+        // 📱 КОНФИГУРАЦИЯ МАСШТАБИРОВАНИЯ
         scale: {
             mode: Phaser.Scale.FIT, // Вписывает игру в экран
             autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -28,6 +29,7 @@ function startGame() {
             create: create,
             update: update 
         },
+        // 🕹️ ПОДКЛЮЧАЕМ ПЛАГИН ДЖОЙСТИКА
         plugins: {
             global: [{
                 key: 'rexVirtualJoystick',
@@ -43,7 +45,6 @@ function startGame() {
 // 1. Загрузка ресурсов
 function preload ()
 {
-    // Меняем спрайт на маленький, чтобы соответствовать пикселю, или используем блок
     this.load.image('player', 'https://labs.phaser.io/assets/sprites/block.png'); 
 }
 
@@ -53,10 +54,9 @@ function create ()
     this.add.text(10, 10, 'Миры Роркха: Перемещение по сетке (60x60)', { fontSize: '32px', fill: '#00ff00' }).setScrollFactor(0);
     this.add.text(10, 50, 'Двигайтесь джойстиком или WASD. Шаг = 60px.', { fontSize: '18px', fill: '#cccccc' }).setScrollFactor(0);
     
-    // Создаем игрока, центрируем его на первой ячейке (0,0) + половина тайла
-    // Начнем с позиции, кратной TILE_SIZE: (4 * 60 + 30, 4 * 60 + 30)
+    // Создаем игрока
     player = this.add.sprite(270, 270, 'player'); 
-    player.displayWidth = TILE_SIZE / 2; // Визуально уменьшаем, чтобы он выглядел как "пиксель"
+    player.displayWidth = TILE_SIZE / 2; // Визуально уменьшаем
     player.displayHeight = TILE_SIZE / 2;
     player.setTint(0xcc3333); 
 
@@ -90,30 +90,23 @@ function create ()
         thumb: this.add.circle(0, 0, 25, 0xcccccc).setAlpha(0.8).setScrollFactor(0),
         forceMin: 16
     }).on('update', function () {
-        // Мы используем 'pointerup' для фиксации намерения двигаться
+        // Логика джойстика обрабатывается через 'pointerup'
     }, this);
     
-    // 🖱️ ОБРАБОТКА НАЖАТИЯ НА ДЖОЙСТИК (или клика)
+    // 🖱️ ОБРАБОТКА ОТПУСКАНИЯ ДЖОЙСТИКА (чтобы сделать один шаг)
     this.input.on('pointerup', (pointer) => {
-        // Проверяем, был ли указатель отпущен над джойстиком
+        // Проверяем, было ли отпущено над джойстиком
         if (joystick && joystick.isPointInCircle(pointer.x, pointer.y)) {
-             // Получаем направление движения по осям (dx, dy)
             const angle = Phaser.Math.RadToDeg(joystick.angle);
             let dx = 0;
             let dy = 0;
             
             // Определяем основное направление (N, S, E, W)
-            if (angle > 315 || angle <= 45) { // Право
-                dx = 1;
-            } else if (angle > 45 && angle <= 135) { // Вверх
-                dy = -1;
-            } else if (angle > 135 && angle <= 225) { // Лево
-                dx = -1;
-            } else if (angle > 225 && angle <= 315) { // Вниз
-                dy = 1;
-            }
+            if (angle > 315 || angle <= 45) { dx = 1; }
+            else if (angle > 45 && angle <= 135) { dy = -1; }
+            else if (angle > 135 && angle <= 225) { dx = -1; }
+            else if (angle > 225 && angle <= 315) { dy = 1; }
             
-            // Если направление определено, начинаем движение по сетке
             if (dx !== 0 || dy !== 0) {
                 movePlayer(this, dx, dy);
             }
@@ -121,16 +114,14 @@ function create ()
     });
 }
 
-// 💥 НОВАЯ ФУНКЦИЯ: ДВИЖЕНИЕ ПО СЕТКЕ
+// 💥 ФУНКЦИЯ: ДВИЖЕНИЕ ПО СЕТКЕ
 function movePlayer(scene, dx, dy) {
-    // Если игрок уже двигается, игнорируем команду
     if (isMoving) {
         return;
     }
 
-    isMoving = true; // Блокируем новые движения
+    isMoving = true; 
     
-    // Вычисляем новую позицию
     const newX = player.x + dx * TILE_SIZE;
     const newY = player.y + dy * TILE_SIZE;
 
@@ -139,10 +130,10 @@ function movePlayer(scene, dx, dy) {
         targets: player,
         x: newX,
         y: newY,
-        duration: 200, // Скорость шага (в мс)
+        duration: 200, 
         ease: 'Linear',
         onComplete: () => {
-            isMoving = false; // Разблокируем движение после завершения
+            isMoving = false; // Разблокируем движение
             savePlayerPosition(); // Сохраняем новую позицию в БД
         }
     });
@@ -152,7 +143,6 @@ function movePlayer(scene, dx, dy) {
 function savePlayerPosition() {
     if (!player || !currentUserId) return; 
 
-    // Сохраняем позицию, которая кратна TILE_SIZE/2 (центр тайла)
     db.collection('players').doc(currentUserId).set({
         x: player.x,
         y: player.y,
@@ -163,17 +153,14 @@ function savePlayerPosition() {
 // 3. Игровой цикл
 function update (time, delta)
 {
-    // Логика клавиатуры (WASD)
-    if (cursors.left.isDown) {
+    // Логика клавиатуры (WASD) - обрабатывает одно нажатие
+    if (cursors.left.isDown && !isMoving) {
         movePlayer(this, -1, 0);
-    } else if (cursors.right.isDown) {
+    } else if (cursors.right.isDown && !isMoving) {
         movePlayer(this, 1, 0);
-    } else if (cursors.up.isDown) {
+    } else if (cursors.up.isDown && !isMoving) {
         movePlayer(this, 0, -1);
-    } else if (cursors.down.isDown) {
+    } else if (cursors.down.isDown && !isMoving) {
         movePlayer(this, 0, 1);
     }
-    
-    // Важно: для джойстика мы используем событие 'pointerup' в create, 
-    // чтобы шаг совершался один раз, а не постоянно, как в update.
 }
