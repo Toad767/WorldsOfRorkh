@@ -12,7 +12,7 @@ let isMoving = false; // Флаг для контроля движения по 
 function startGame() {
     // Получаем необходимые переменные после входа
     currentUserId = firebase.auth().currentUser.uid;
-    db = firebase.firestore(); 
+    db = firebase.firestore(); // <-- Инициализация Firestore
     
     const config = {
         type: Phaser.AUTO, 
