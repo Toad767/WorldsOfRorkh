@@ -1,17 +1,19 @@
+// /js/auth.js (ФИНАЛЬНАЯ ВЕРСИЯ)
+
 // =========================================================
-// ВАШ КОНФИГУРАЦИОННЫЙ ОБЪЕКТ FIREBASE (Взят из вашего файла)
+// ВАШ КОНФИГУРАЦИОННЫЙ ОБЪЕКТ FIREBASE (С ВАШИМИ КЛЮЧАМИ!)
 // =========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyAGHdvrAlaiEnuGRFCpFQki4YCKEqe-lfs",
-  authDomain: "rorkh-1a613.firebaseapp.com",
-  projectId: "rorkh-1a613",
+  apiKey: "AIzaSyAGHdvrAlaiEnuGRFCpFQki4YCKEqe-lfs", // <-- ЗАМЕНИТЕ ЭТО!
+  authDomain: "rorkh-1a613.firebaseapp.com",        // <-- ЗАМЕНИТЕ ЭТО!
+  projectId: "rorkh-1a613",                        // <-- ЗАМЕНИТЕ ЭТО!
   storageBucket: "rorkh-1a613.firebasestorage.app",
   messagingSenderId: "616945852200",
   appId: "1:616945852200:web:5b768d4f95a95a3af93a1d",
   measurementId: "G-FQEGBRHLCZ"
 };
 
-// Инициализация Firebase (Используем синтаксис "compat", как в index.html)
+// Инициализация Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 let currentUserId = null; // Для хранения ID вошедшего пользователя
